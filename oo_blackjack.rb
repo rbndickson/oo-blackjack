@@ -83,6 +83,10 @@ class GameMember
     @cards.inject(0) { |sum, card| sum + card.value }
   end
 
+  def busted?
+    sum_cards > 21
+  end
+
 end
 
 class Dealer < GameMember
@@ -126,15 +130,44 @@ class Game
     puts ""
   end
 
-  def play
-    initial_deal
-    display
-    while player.hit?
+  def players_turn
+    while player.hit? && !player.busted?
       deck.deal_card(@player)
       display
     end
-    puts player.sum_cards
-    puts dealer.sum_cards
+  end
+
+  def dealers_turn
+    while dealer.sum_cards < 17
+      deck.deal_card(@dealer)
+      display
+    end
+  end
+
+  def compare
+    if player.sum_cards > dealer.sum_cards
+      puts 'You win!'
+    elsif dealer.sum_cards > player.sum_cards
+      puts 'You lose!'
+    else
+      puts "It's a draw!"
+    end
+  end
+
+  def play
+    initial_deal
+    display
+    players_turn
+    if player.busted?
+      puts 'Busted! You lose! >< '
+    else
+      dealers_turn
+      if dealer.busted?
+        puts 'Dealer has busted! You win!'
+      else
+        compare
+      end
+    end
   end
 
 end
