@@ -34,7 +34,7 @@ class Deck
     suits = ['H', 'D', 'S', 'C']
     characters = ['A', '2', '3', '4', '5', '6', '7',
                    '8', '9', '10', 'J', 'Q', 'K']
-    values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
+    values = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
 
     one_full_deck = []
 
@@ -80,11 +80,27 @@ class GameMember
   end
 
   def sum_cards
-    @cards.inject(0) { |sum, card| sum + card.value }
+    sum = @cards.inject(0) { |sum, card| sum + card.value }
+    aces.times do
+      sum -= 10 if sum > 21
+    end
+    sum
+  end
+
+  def aces
+    aces = 0
+    @cards.each do |c|
+      aces += 1 if c.character == 'A'
+    end
+    aces
   end
 
   def busted?
     sum_cards > 21
+  end
+
+  def blackjack?
+    sum_cards == 21 && aces == 1
   end
 
 end
@@ -128,10 +144,13 @@ class Game
     puts "Dealer has #{@dealer.print_cards}"
     puts "You have #{@player.print_cards}"
     puts ""
+    puts "Dealer has #{dealer.sum_cards}"
+    puts "You have #{player.sum_cards}"
+    puts ""
   end
 
   def players_turn
-    while player.hit? && !player.busted?
+    while !player.busted? && player.hit?
       deck.deal_card(@player)
       display
     end
@@ -154,22 +173,38 @@ class Game
     end
   end
 
-  def play
+  def play_one_game
     initial_deal
     display
-    players_turn
-    if player.busted?
-      puts 'Busted! You lose! >< '
+    if player.blackjack?
+      compare
     else
-      dealers_turn
-      if dealer.busted?
-        puts 'Dealer has busted! You win!'
+      players_turn
+      if player.busted?
+        puts 'You have busted! You lose! (>_<) '
       else
-        compare
+        dealers_turn
+        if dealer.busted?
+          puts 'Dealer has busted! You win!'
+        else
+          compare
+        end
       end
     end
   end
 
 end
 
-Game.new.play
+class Session
+
+  def start
+    loop do
+      Game.new.play_one_game
+      puts 'Play again? (y/n)'
+      break if gets.chomp.downcase == 'n'
+    end
+  end
+end
+
+
+Session.new.start
