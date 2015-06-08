@@ -11,17 +11,15 @@ class Deck
   def create_cards
     suits = ["\xE2\x99\xA5", "\xE2\x99\xA6", "\xE2\x99\xA3", "\xE2\x99\xA0"]
     characters = %w(A 2 3 4 5 6 7 8 9 10 J Q K)
-    values = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
-
-    one_full_deck = []
+    deck = []
 
     suits.each do |suit|
-      characters.each_with_index do |character, i|
-        one_full_deck << Card.new(suit, character, values[i])
+      characters.each do |character|
+        deck << Card.new(suit, character)
       end
     end
 
-    one_full_deck
+    deck
   end
 
   def deal_card(person)
@@ -32,12 +30,11 @@ class Deck
 end
 
 class Card
-  attr_reader :suit, :character, :value
+  attr_reader :suit, :character
 
-  def initialize(suit, character, value)
+  def initialize(suit, character)
     @suit = suit
     @character = character
-    @value = value
   end
 
 end
@@ -65,7 +62,16 @@ class GameMember
   end
 
   def sum_cards
-    sum = @cards.inject(0) { |a, e| a + e.value }
+    sum = @cards.inject(0) do |a, e|
+      if ['J', 'Q', 'K'].include?(e.character)
+        a + 10
+      elsif e.character == 'A'
+        a + 11
+      else
+        a + e.character.to_i
+      end
+    end
+
     aces.times do
       sum -= 10 if sum > 21
     end
@@ -199,14 +205,14 @@ class Game
       display("It's a push!  (#{player.sum_cards} vs. #{dealer.sum_cards})")
     elsif player.sum_cards > dealer.sum_cards
       player.add_win
-      if player.sum_cards == 21
+      if player.sum_cards == 21 && player.cards.count == 2
         display('You win with Blackjack! (^v^)V')
       else
         display("You win!  (#{player.sum_cards} vs. #{dealer.sum_cards})")
       end
     else
       dealer.add_win
-      if player.sum_cards == 21
+      if player.sum_cards == 21 && dealer.cards.count == 2
         display('Dealer wins Blackjack! (>_<)')
       else
         display("You lose!  (#{player.sum_cards} vs. #{dealer.sum_cards})")
