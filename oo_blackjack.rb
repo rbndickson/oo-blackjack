@@ -43,11 +43,6 @@ class Card
 end
 
 class GameMember
-  attr_accessor :cards
-
-  def initialize
-    @cards = []
-  end
 
   def print_cards
     whole_hand_string = ''
@@ -58,7 +53,15 @@ class GameMember
   end
 
   def print_cards_hidden
-    '' << '  **  ' << @cards[1].character << @cards[1].suit
+    whole_hand_string = ''
+    @cards.each_with_index do |c, i|
+      if i == 0
+        whole_hand_string << '  **'
+      else
+        whole_hand_string << '  ' << c.character << c.suit
+      end
+    end
+    whole_hand_string
   end
 
   def sum_cards
@@ -85,13 +88,42 @@ class GameMember
     sum_cards == 21 && aces == 1
   end
 
+  def add_win
+    @wins += 1
+  end
+
 end
 
 class Dealer < GameMember
+  attr_accessor :cards, :name, :wins
 
+  def initialize
+    @name = 'Dealer      '
+    @cards = []
+    @wins = 0
+  end
 end
 
 class Player < GameMember
+  attr_accessor :cards, :name, :wins
+
+  def initialize
+    @name = set_name
+    @cards = []
+    @wins = 0
+  end
+
+  def set_name
+    puts 'Enter player name:'
+    player_name = gets.chomp
+    until player_name.length <= 12
+      puts 'Name too long, please choose a name 12 characters or less.'
+      player_name = gets.chomp
+    end
+    spaces = 12 - player_name.length
+    spaces.times { player_name << ' ' }
+    player_name
+  end
 
   def hit?
     puts 'Hit (h) or stay (s)?'
@@ -106,82 +138,98 @@ class Player < GameMember
 end
 
 class Game
-  attr_accessor :player, :dealer, :deck
+  attr_accessor :deck, :player, :dealer
 
-  def initialize
-    @player = Player.new
-    @dealer = Dealer.new
+  def initialize(p, d)
     @deck = Deck.new
+    @player = p
+    @dealer = d
+    return_previous_cards
   end
 
-  def pause_puts(message)
-    sleep 0.5
-    puts message
+  def return_previous_cards
+    player.cards = []
+    dealer.cards = []
   end
 
   def initial_deal
+    display('')
     2.times do
       deck.deal_card(@player)
+      display_hidden
       deck.deal_card(@dealer)
+      display_hidden
     end
   end
 
-  def display
+  def display(message)
+    sleep 0.8
     system 'clear'
-    puts "\n Dealer     #{@dealer.print_cards}"
-    puts "\n You        #{@player.print_cards}\n\n"
+    puts "\n wins\n"
+    puts "  #{@dealer.wins}    #{@dealer.name}#{@dealer.print_cards}\n\n"
+    puts "  #{@player.wins}    #{@player.name}#{@player.print_cards}\n\n"
+    puts "#{message}"
   end
 
   def display_hidden
+    sleep 0.8
     system 'clear'
-    puts "\n Dealer     #{@dealer.print_cards_hidden}"
-    puts "\n You        #{@player.print_cards}\n\n"
+    puts "\n wins\n"
+    puts "  #{@dealer.wins}    #{@dealer.name}#{@dealer.print_cards_hidden}\n\n"
+    puts "  #{@player.wins}    #{@player.name}#{@player.print_cards}\n\n"
   end
 
   def players_turn
     while !player.busted? && player.hit?
-      sleep 1
       deck.deal_card(@player)
       display_hidden
     end
   end
 
   def dealers_turn
-    sleep 0.5
-    display
+    display('')
     while dealer.sum_cards < 17
-      sleep 1
       deck.deal_card(@dealer)
-      display
+      display('')
     end
   end
 
-  def compare
-    sleep 0.5
-    if player.sum_cards > dealer.sum_cards
-      pause_puts 'You win!'
-    elsif dealer.sum_cards > player.sum_cards
-      pause_puts 'You lose!'
+  def result
+    if player.sum_cards == dealer.sum_cards
+      display("It's a push!  (#{player.sum_cards} vs. #{dealer.sum_cards})")
+    elsif player.sum_cards > dealer.sum_cards
+      player.add_win
+      if player.sum_cards == 21
+        display('You win with Blackjack! (^v^)V')
+      else
+        display("You win!  (#{player.sum_cards} vs. #{dealer.sum_cards})")
+      end
     else
-      pause_puts "It's a draw!"
+      dealer.add_win
+      if player.sum_cards == 21
+        display('Dealer wins Blackjack! (>_<)')
+      else
+        display("You lose!  (#{player.sum_cards} vs. #{dealer.sum_cards})")
+      end
     end
   end
 
   def play_one_game
     initial_deal
-    display_hidden
     if player.blackjack?
-      compare
+      result
     else
       players_turn
       if player.busted?
-        pause_puts 'You have busted! You lose! (>_<) '
+        dealer.add_win
+        display('You have busted! You lose! (>_<)')
       else
         dealers_turn
         if dealer.busted?
-          pause_puts 'Dealer has busted! You win!'
+          player.add_win
+          display('Dealer has busted! You win!')
         else
-          compare
+          result
         end
       end
     end
@@ -190,12 +238,22 @@ class Game
 end
 
 class Session
+  attr_accessor :player, :dealer
+
+  def initialize
+    system 'clear'
+    puts 'Welcome to Blackjack 0.2!'
+    @player = Player.new
+    @dealer = Dealer.new
+  end
 
   def start
+
     loop do
-      Game.new.play_one_game
-      sleep 0.5
-      puts 'Play again? (y/n)'
+      game = Game.new(player, dealer)
+      game.play_one_game
+      sleep 1.5
+      puts "\nPlay again? (y/n)"
       break if gets.chomp.downcase == 'n'
     end
   end
