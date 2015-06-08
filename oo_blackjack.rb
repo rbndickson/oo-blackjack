@@ -39,6 +39,7 @@ class Card
     @character = character
     @value = value
   end
+
 end
 
 class GameMember
@@ -101,6 +102,7 @@ class Player < GameMember
     end
     choice == 'h'
   end
+
 end
 
 class Game
@@ -199,6 +201,5 @@ class Session
   end
 
 end
-
 
 Session.new.start
