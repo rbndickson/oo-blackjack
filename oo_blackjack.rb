@@ -258,7 +258,7 @@ class Session
     loop do
       game = Game.new(player, dealer)
       game.play_one_game
-      sleep 1.5
+      sleep 1
       puts "\nPlay again? (y/n)"
       break if gets.chomp.downcase == 'n'
     end
