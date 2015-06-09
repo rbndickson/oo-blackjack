@@ -1,5 +1,7 @@
 # oo_blackjack.rb
 
+VERSION = "0.2"
+
 class Deck
   attr_accessor :cards
 
@@ -264,7 +266,7 @@ class Session
 
   def initialize
     system 'clear'
-    puts 'Welcome to Blackjack 0.2!'
+    puts "Welcome to Blackjack #{VERSION}!"
     @player = Player.new
     @dealer = Dealer.new
   end
