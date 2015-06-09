@@ -72,7 +72,7 @@ class GameMember
     end
 
     aces.times do
-      sum -= 10 if sum > 21
+      sum -= 10 if sum > Game::BLACKJACK_AMOUNT
     end
     sum
   end
@@ -86,11 +86,11 @@ class GameMember
   end
 
   def busted?
-    sum_cards > 21
+    sum_cards > Game::BLACKJACK_AMOUNT
   end
 
   def blackjack?
-    sum_cards == 21 && cards.count == 2
+    sum_cards == Game::BLACKJACK_AMOUNT && cards.count == 2
   end
 
   def add_win
@@ -143,6 +143,9 @@ end
 
 class Game
   attr_accessor :deck, :player, :dealer
+
+  BLACKJACK_AMOUNT = 21
+  DEALER_MIN_STAY = 17
 
   def initialize(p, d)
     @deck = Deck.new
@@ -199,28 +202,32 @@ class Game
 
   def dealers_turn
     display('')
-    while dealer.sum_cards < 17
+    while dealer.sum_cards < DEALER_MIN_STAY
       deck.deal_card(@dealer)
       display('')
     end
   end
 
+  def result_display
+    "#{player.sum_cards} vs. #{dealer.sum_cards}"
+  end
+
   def result
     if player.sum_cards == dealer.sum_cards
-      display("It's a push!  (#{player.sum_cards} vs. #{dealer.sum_cards})")
+      display("It's a push!  (#{result_display})")
     elsif player.sum_cards > dealer.sum_cards
       player.add_win
-      if player.sum_cards == 21 && player.cards.count == 2
+      if player.sum_cards == BLACKJACK_AMOUNT && player.cards.count == 2
         display('You win with Blackjack! (^v^)V')
       else
-        display("You win!  (#{player.sum_cards} vs. #{dealer.sum_cards})")
+        display("You win!  (#{result_display})")
       end
     else
       dealer.add_win
-      if dealer.sum_cards == 21 && dealer.cards.count == 2
+      if dealer.sum_cards == BLACKJACK_AMOUNT && dealer.cards.count == 2
         display('Dealer wins with Blackjack! (>_<)')
       else
-        display("You lose!  (#{player.sum_cards} vs. #{dealer.sum_cards})")
+        display("You lose!  (#{result_display})")
       end
     end
   end
