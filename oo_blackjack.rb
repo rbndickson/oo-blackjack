@@ -90,7 +90,7 @@ class GameMember
   end
 
   def blackjack?
-    sum_cards == 21 && aces == 1
+    sum_cards == 21 && cards.count == 2
   end
 
   def add_win
@@ -125,8 +125,7 @@ class Player < GameMember
       puts 'Name too long, please choose a name 12 characters or less.'
       player_name = gets.chomp
     end
-    spaces = 12 - player_name.length
-    spaces.times { player_name << ' ' }
+
     player_name
   end
 
@@ -167,12 +166,19 @@ class Game
     end
   end
 
+
+  def display_name(game_member)
+    spaces = String.new
+    (12 - game_member.name.length).times { spaces << ' ' }
+    game_member.name + spaces
+  end
+
   def display(message)
     sleep 0.8
     system 'clear'
     puts "\n wins\n"
-    puts "  #{@dealer.wins}    #{@dealer.name}#{@dealer.print_cards}\n\n"
-    puts "  #{@player.wins}    #{@player.name}#{@player.print_cards}\n\n"
+    puts "  #{@dealer.wins}    #{display_name(dealer)}#{@dealer.print_cards}\n\n"
+    puts "  #{@player.wins}    #{display_name(player)}#{@player.print_cards}\n\n"
     puts "#{message}"
   end
 
@@ -180,8 +186,8 @@ class Game
     sleep 0.8
     system 'clear'
     puts "\n wins\n"
-    puts "  #{@dealer.wins}    #{@dealer.name}#{@dealer.print_cards_hidden}\n\n"
-    puts "  #{@player.wins}    #{@player.name}#{@player.print_cards}\n\n"
+    puts "  #{@dealer.wins}    #{display_name(dealer)}#{@dealer.print_cards_hidden}\n\n"
+    puts "  #{@player.wins}    #{display_name(player)}#{@player.print_cards}\n\n"
   end
 
   def players_turn
@@ -211,8 +217,8 @@ class Game
       end
     else
       dealer.add_win
-      if player.sum_cards == 21 && dealer.cards.count == 2
-        display('Dealer wins Blackjack! (>_<)')
+      if dealer.sum_cards == 21 && dealer.cards.count == 2
+        display('Dealer wins with Blackjack! (>_<)')
       else
         display("You lose!  (#{player.sum_cards} vs. #{dealer.sum_cards})")
       end
