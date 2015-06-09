@@ -23,8 +23,7 @@ class Deck
   end
 
   def deal_card(person)
-    card = @cards.pop
-    person.cards << card
+    person.cards << @cards.pop
   end
 
 end
