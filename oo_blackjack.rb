@@ -180,8 +180,10 @@ class Game
     sleep 0.8
     system 'clear'
     puts "\n wins\n"
-    puts "  #{@dealer.wins}    #{display_name(dealer)}#{@dealer.print_cards}\n\n"
-    puts "  #{@player.wins}    #{display_name(player)}#{@player.print_cards}\n\n"
+    puts "  #{@dealer.wins}    #{display_name(dealer)}" \
+         "#{@dealer.print_cards}\n\n"
+    puts "  #{@player.wins}    #{display_name(player)}" \
+         "#{@player.print_cards}\n\n"
     puts "#{message}"
   end
 
@@ -189,8 +191,10 @@ class Game
     sleep 0.8
     system 'clear'
     puts "\n wins\n"
-    puts "  #{@dealer.wins}    #{display_name(dealer)}#{@dealer.print_cards_hidden}\n\n"
-    puts "  #{@player.wins}    #{display_name(player)}#{@player.print_cards}\n\n"
+    puts "  #{@dealer.wins}    #{display_name(dealer)}" \
+         "#{@dealer.print_cards_hidden}\n\n"
+    puts "  #{@player.wins}    #{display_name(player)}" \
+         "#{@player.print_cards}\n\n"
   end
 
   def players_turn
